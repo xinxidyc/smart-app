@@ -6,20 +6,40 @@
 			</view>
 
 			<view class="list">
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.username" placeholder="用户名" />
-				</view>
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.phone" type="number" maxlength="11" placeholder="手机号" />
-				</view>
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.password" type="text" maxlength="32" placeholder="登录密码"
-						:password="!showPassword" />
-				</view>
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.code" type="number" maxlength="4" placeholder="验证码" />
-					<view class="yzm" :class="{ yzms: second>0 }" @tap="getcode">{{yanzhengma}}</view>
-				</view>
+				<u--form :model="initparam" ref="uForm" labelWidth="60" :rules="rules">
+					<u-form-item label="用户名" prop="actualName" borderBottom>
+						<u-input v-model="initparam.actualName" border="bottom" placeholder="请输入手机号或者账号"/>
+					</u-form-item>
+					<u-form-item label="用户名" prop="loginName" borderBottom>
+						<u-input v-model="initparam.loginName" border="bottom" placeholder="请输入手机号或者账号"/>
+					</u-form-item>
+					<u-form-item label="性别" prop="gender" borderBottom>
+						<u-radio-group
+						    v-model="initparam.gender"
+						    placement="row"
+						  >
+						    <u-radio
+						      :customStyle="{marginRight: '15upx'}"
+						      v-for="(item, index) in columns"
+						      :key="index"
+						      :label="item.label"
+						      :name="item.id"
+						    >
+						    </u-radio>
+						  </u-radio-group>
+					</u-form-item>
+					<u-form-item label="手机号" prop="phone" borderBottom>
+						<u-input v-model="initparam.phone" border="bottom" placeholder="请输入密码"/>
+					</u-form-item>
+					<u-form-item label="密码" prop="loginPwd" borderBottom>
+						<u-input v-model="initparam.loginPwd" border="bottom" placeholder="请输入密码"/>
+					</u-form-item>
+					<u-form-item label="验证码" prop="code" borderBottom>
+						<u-input v-model="initparam.code" border="bottom" placeholder="请输入验证码"/>
+						<view class="yzm" :class="{ yzms: second>0 }" @tap="getcode">{{yanzhengma}}</view>
+						<!-- <img class="captcha-img" :src="captchaBase64Image" @click="getCaptcha" /> -->
+					</u-form-item>
+				</u--form>
 
 			</view>
 
@@ -37,7 +57,7 @@
 		<popup-sure ref="popupRef" title="软件用户协议" @sure="surePopup">
 			<h3>1.知识产权保护</h3>
 			<view>
-				该软件(_________)的著作权和所有权由_________有限公司所有。该软件受_________国著作权法和国际条约条款的保护。商标的使用应符合商标惯例，包括和商标所有人名称的一致。商标可以仅用于对该软件产品的识别。对于任何商标的该种使用都不会导致对该商标使用权的拥有。除上述以外，该协议不授予你该软件上的任何知识产权。
+				该软件的著作权和所有权由_________所有。该软件受中华人民共和国著作权法和国际条约条款的保护。商标的使用应符合商标惯例，包括和商标所有人名称的一致。商标可以仅用于对该软件产品的识别。对于任何商标的该种使用都不会导致对该商标使用权的拥有。除上述以外，该协议不授予你该软件上的任何知识产权。
 			</view>
 			<h3>2.软件的使用</h3>
 			<view>你可以：
@@ -92,7 +112,8 @@
 		onUnload
 	} from '@dcloudio/uni-app'
 
-	import popupSure from "@/components/my-ui/popup/popup-sure.vue"
+	import popupSure from "@/components/my-ui/popup/popup-sure.vue";
+	import {userApi} from '@/api'
 
 	onUnload(() => {
 		clearTimer()
@@ -101,11 +122,24 @@
 	let popupRef = ref < any > (null)
 	const state = reactive({
 		initparam: {
-			username: '',
+			actualName: '',
+			loginName: '',
+			gender: '',
+			departmentId: '2',
+			disabledFlag: true,
 			phone: '',
-			password: '',
+			loginPwd: '',
 			code: ""
 		},
+		columns: [
+			{
+				label: '男',
+				id: 1
+			}, {
+				label: '女',
+				id: 0
+			}
+		],
 		second: 0,
 		agreement: true,
 		showPassword: true,
@@ -157,7 +191,23 @@
 		popupRef.value.open()
 	}
 	const change = () => {}
-	const register = () => {}
+	const register = async () => {
+		const res= await userApi.register(state.initparam)
+		if(res.ok){
+			uni.showToast({
+				icon: 'none',
+				title: '注册成功'
+			})
+			uni.reLaunch({
+				url: '/pages/login/login',
+			});
+		}else{
+			uni.showToast({
+				icon: 'none',
+				title: '注册失败'
+			})
+		}
+	}
 	const surePopup = () => {
 		popupRef.value.close()
 	}
@@ -168,7 +218,8 @@
 		initparam,
 		showPassword,
 		agreement,
-		second
+		second,
+		columns
 	} = toRefs(state)
 </script>
 

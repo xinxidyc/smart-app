@@ -27,10 +27,19 @@
 		{
 			"path": "pages/workOrder/detail",
 			"style": {
-				"navigationBarTitleText": "工单详情"
+				"navigationBarTitleText": "统计分析"
 			}
 		}
-	],
+	    ,{
+            "path" : "pages/workOrder/editor",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "修改信息",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
 	"subPackages": [{
 		"root": "pages/login",
 		"pages": [{
@@ -59,24 +68,6 @@
 				}
 			}
 		]
-	},
-	{
-		"root": "pages/scan",
-		"pages": [{
-				"path": "index",
-				"aliasPath": "/", //对于h5端你必须在首页加上aliasPath并设置为/
-				"style": {
-					"navigationBarTitleText": "扫描",
-					"navigationStyle":"custom"
-				}
-			},
-			{
-				"path": "scan",
-				"style": {
-					"navigationBarTitleText": "扫一扫"
-				}
-			}
-		]
 	}],
 	"tabBar": {
 		"color": "#7A7E83",
@@ -94,12 +85,6 @@
 				"iconPath": "static/images/tabbar/tab-mine.png",
 				"selectedIconPath": "static/images/tabbar/tab-mine-selected.png",
 				"text": "数字签名"
-			},
-			{
-				"pagePath": "pages/scan/index",
-				"iconPath": "static/images/tabbar/tab-mine.png",
-				"selectedIconPath": "static/images/tabbar/tab-mine-selected.png",
-				"text": "扫描码"
 			},
 			{
 				"pagePath": "pages/mine/index",
@@ -123,5 +108,11 @@
 			"path": "pages/index/index", //启动页面，必选
 			"query": "" //启动参数，在页面的onLoad函数里面得到
 		}]
+	},
+	"easycom": {
+	    "autoscan": true,
+	    "custom": {
+		"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue"
+	    }
 	}
 }

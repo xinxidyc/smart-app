@@ -1,21 +1,19 @@
 import axios from 'axios'
 
-import { getFullURL } from '@/utils/http'
+import { getFullURL } from '@/utils/axiosRequest/getFullURL'
 
 const instance = axios.create({
   // Web 侧可以通过 vite.config.js 中的 proxy 配置，指定代理
   // 小程序APP里需写完整路径，如 https://service-rbji0bev-1256505457.cd.apigw.tencentcs.com/release
   // 可使用条件编译,详见 https://uniapp.dcloud.io/tutorial/platform.html#preprocessor
   // #ifdef H5
-  baseURL: import.meta.env.VITE_APP_AXIOS_BASE_URL,
+  baseURL: 'http://127.0.0.1:1024/',  //import.meta.env.VITE_APP_AXIOS_BASE_URL
   // #endif
   // #ifndef H5
   // @ts-ignore
-  baseURL: 'https://service-rbji0bev-1256505457.cd.apigw.tencentcs.com/release',
+  baseURL: 'http://127.0.0.1:1024/',
   // #endif
   adapter(config) {
-    console.log('request adapter ↓↓')
-    console.log(config)
     const { url, method, data, params, headers, baseURL, paramsSerializer } =
       config
     return new Promise((resolve, reject) => {
@@ -46,11 +44,12 @@ instance.interceptors.request.use((config) => {
   const { method, params } = config
   // 附带鉴权的token
   const headers: any = {
-    token: uni.getStorageSync('token')
+    'x-access-token': uni.getStorageSync('token')
   }
   // 不缓存get请求
   if (method === 'get') {
-    headers['Cache-Control'] = 'no-cache'
+    headers['Cache-Control'] = 'no-cache';
+	headers['Content-type'] = 'application/json;'
   }
   // delete请求参数放入body中
   if (method === 'delete') {

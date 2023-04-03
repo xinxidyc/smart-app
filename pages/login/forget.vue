@@ -6,17 +6,20 @@
 			</view>
 
 			<view class="list">
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.phone" type="number" maxlength="11" placeholder="手机号" />
-				</view>
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.password" type="text" maxlength="32" placeholder="新密码"
-						:password="!showPassword" />
-				</view>
-				<view class="list-call">
-					<input class="sl-input" v-model="initparam.code" type="number" maxlength="4" placeholder="验证码" />
-					<view class="yzm" :class="{ yzms: second>0 }" @tap="getcode">{{yanzhengma}}</view>
-				</view>
+				<u--form :model="initparam" ref="uForm" labelWidth="60" :rules="rules">
+					<u-form-item label="手机号" prop="mobileNo" borderBottom>
+						<u-input v-model="initparam.mobileNo" border="bottom" placeholder="请输入手机号或者账号"/>
+					</u-form-item>
+					<u-form-item label="新密码" prop="newPassword" borderBottom>
+						<u-input type="password" v-model="initparam.newPassword" border="bottom" placeholder="请输入手机号或者账号"/>
+					</u-form-item>
+
+					<u-form-item label="验证码" prop="sms" borderBottom>
+						<u-input v-model="initparam.sms" border="bottom" placeholder="请输入验证码"/>
+						<view class="yzm" :class="{ yzms: second>0 }" @tap="getcode">{{yanzhengma}}</view>
+						<!-- <img class="captcha-img" :src="captchaBase64Image" @click="getCaptcha" /> -->
+					</u-form-item>
+				</u--form>
 
 			</view>
 
@@ -90,6 +93,7 @@
 	} from '@dcloudio/uni-app'
 
 	import popupSure from "@/components/my-ui/popup/popup-sure.vue"
+	import {userApi} from '@/api'
 
 	onUnload(() => {
 		clearTimer()
@@ -98,10 +102,9 @@
 	let popupRef = ref < any > (null)
 	const state = reactive({
 		initparam: {
-			username: '',
-			phone: '',
-			password: '',
-			code: ""
+			mobileNo: '',
+			newPassword: '',
+			sms: '',
 		},
 		second: 0,
 		agreement: true,
@@ -154,7 +157,23 @@
 		popupRef.value.open()
 	}
 	const change = () => {}
-	const register = () => {}
+	const register = async () => {
+		const res= await userApi.reset(state.initparam)
+		if(res.ok){
+			uni.showToast({
+				icon: 'none',
+				title: '重置密码成功'
+			})
+			uni.reLaunch({
+				url: '/pages/login/login',
+			});
+		}else{
+			uni.showToast({
+				icon: 'none',
+				title: '重置密码失败'
+			})
+		}
+	}
 	const surePopup = () => {
 		popupRef.value.close()
 	}

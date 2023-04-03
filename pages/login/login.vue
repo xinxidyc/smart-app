@@ -1,33 +1,22 @@
 <template>
 	<view class="contenter bgwhite">
 		<view class="status_bar"></view>
-		<view class="topview">
-			<text class="txt-size-normal color-697284">{{offline?"离线模式":""}}</text>
-			<image src="/static/images/login/ipset.png" mode="aspectFit" class="ipsetimg" @click="toipset"></image>
-		</view>
 		<view class="content">
 			<view>
 				<image src="/static/images/login/logo.png" class="logoimg"></image>
-				<view class="inputrow" :class="nameline">
-					<image src="/static/images/login/account.png" class="inputimg"></image>
-					<view class="uni-input-wrapper">
-						<input class="uni-input txt-size-big" placeholder="请输入帐号" v-model="initparam.username"
-							@input="clearInput" @focus="onFocus(0)" @blur="onBlur(0)" />
-						<text class="uni-icon txt-size-big" style="padding: 12upx 8upx;" v-if="showClearIcon"
-							@click="clearIcon">&#xe434;</text>
-					</view>
-				</view>
-				<view class="inputrow" :class="psline">
-					<image src="/static/images/login/password.png" class="inputimg"></image>
-					<view class="uni-input-wrapper">
-						<input class="uni-input txt-size-big" placeholder="请输入密码" :password="showPassword"
-							v-model="initparam.password" @focus="onFocus(1)" @blur="onBlur(1)" />
-						<text class="uni-icon txt-size-big" style="padding: 12upx 8upx;"
-							:class="[!showPassword ? 'color-4a78ff' : 'color-9aa1ad']"
-							@click="changePassword">&#xe568;</text>
-					</view>
-				</view>
-				<text class="infor color-ffa100 txt-size-small">{{infor}}</text>
+				<u--form :model="loginForm" ref="uForm" labelWidth="60" :rules="rules">
+					<u-form-item label="账号" prop="loginName" borderBottom>
+						<u-input v-model="loginForm.loginName" border="bottom" placeholder="请输入手机号或者账号"/>
+					</u-form-item>
+					<u-form-item label="密码" prop="password" borderBottom>
+						<u-input v-model="loginForm.password" border="bottom" placeholder="请输入密码"/>
+					</u-form-item>
+					<u-form-item label="验证码" prop="captchaCode" borderBottom>
+						<u-input v-model="loginForm.captchaCode" border="bottom" placeholder="请输入验证码"/>
+						<img class="captcha-img" :src="captchaBase64Image" @click="getCaptcha" />
+					</u-form-item>
+				</u--form>
+
 				<button class="btn-login color-white" @click="login()">登录</button>
 				<view class="agreenment">
 					<navigator url="/pages/login/forget" open-type="navigate">忘记密码</navigator>
@@ -36,13 +25,12 @@
 				</view>
 			</view>
 		</view>
-
 		<view class="bottomview">
 			<!-- #ifdef APP-PLUS -->
 			<text class="txt-size-small color-tips">本机唯一识别码</text>
 			<!-- #endif -->
 			<text :selectable="true" class="txt-size-small color-normal"
-				style="height: 32upx;line-height: 32upx;">uniapp-demo</text>
+				style="height: 32upx;line-height: 32upx;">登录进行更多管理</text>
 			<image src="/static/images/login/ymk.png"></image>
 		</view>
 	</view>
@@ -58,19 +46,62 @@
 		onShow,
 		onLoad,
 	} from '@dcloudio/uni-app'
+	import {userApi} from '@/api'
+	import { LOGIN_DEVICE_ENUM } from './login-device-const.js';
+	import useStore from '@/store/modules/user';
+	
 	const state = reactive({
 		initparam: {
 			username: '',
-			password: ''
+			password: '',
+			captchaCode: '', //验证码
 		},
-		offline: false,
-		infor: "",
+		loginForm: {
+			loginName: 'admin',
+		    password: '',
+		    captchaCode: '',
+		    captchaUuid: '',
+		    loginDevice: LOGIN_DEVICE_ENUM.PC.value,
+		},
+		list: [{
+			text: '点赞',
+			color: 'blue',
+			fontSize: 28
+		}, {
+			text: '分享'
+		}, {
+			text: '评论'
+		}],
+		show: true,
 		nameline: "border_bottom_line",
 		psline: "border_bottom_line",
 		showClearIcon: false,
 		showPassword: true,
-	})
-	const toipset = () => {}
+	});
+	const captchaBase64Image = ref('');
+	const getCaptcha = async () =>{
+		let captchaResult = await userApi.getCaptcha();
+		console.log(captchaResult)
+		if(captchaResult.ok){
+			captchaBase64Image.value = captchaResult.data.captchaBase64Image;
+			state.loginForm.captchaUuid = captchaResult.data.captchaUuid;
+			beginRefrestCaptchaInterval(captchaResult.data.expireSeconds);
+		}
+	}
+	let refrestCaptchaInterval = null;
+	const beginRefrestCaptchaInterval=(expireSeconds) => {
+	  if (refrestCaptchaInterval === null) {
+	    refrestCaptchaInterval = setInterval(getCaptcha, (expireSeconds - 5) * 1000);
+	  }
+	}
+	
+	const stopRefrestCaptchaInterval = () =>{
+	  if (refrestCaptchaInterval != null) {
+	    clearInterval(refrestCaptchaInterval);
+	    refrestCaptchaInterval = null;
+	  }
+	}
+
 	const clearInput = (event) => {
 		state.initparam.username = event.detail.value;
 		if (event.detail.value.length > 0) {
@@ -86,45 +117,45 @@
 	const changePassword = () => {
 		state.showPassword = !state.showPassword;
 	}
-	const onFocus = (option) => {
-		if (state.infor) {
-			state.infor = null;
-			state.psline = 'border_bottom_line';
-			state.nameline = 'border_bottom_line';
-		}
-		if (option == 1) {
-			state.psline = 'border_bottom_line_focus';
-		} else {
-			state.nameline = 'border_bottom_line_focus';
-		}
-	}
-	const onBlur = (option) => {
-		if (option == 1) {
-			state.psline = 'border_bottom_line';
-		} else {
-			state.nameline = 'border_bottom_line';
-		}
-	}
+	const rules = ref({
+	  loginName: [{ required: true, message: '用户名不能为空' }],
+	  password: [{ required: true, message: '密码不能为空' }],
+	  captchaCode: [{ required: true, message: '验证码不能为空' }],
+	})
+    const uForm = ref(null)
+	const store = useStore()
 	const login = () => {
-		uni.showToast({
-			icon: 'none',
-			title: '登录成功'
-		});
-		uni.reLaunch({
-			url: '/pages/index/index',
-		});
+		uForm.value.validate().then(async rsd => {
+			const res= await userApi.login(state.loginForm)
+			stopRefrestCaptchaInterval();
+			uni.setStorageSync('token',res.data.token ? res.data.token : '',)
+			store.setUserInfo(res.data)
+			uni.showToast({
+				icon: 'none',
+				title: '登录成功'
+		    })
+			uni.reLaunch({
+				url: '/pages/index/index',
+			});
+		}).catch(errors => {
+			// uni.showToast({
+			// 	icon: 'none',
+			// 	title: '登录失败'
+		 //    })
+		})
 	}
 	onLoad((e) => {
-
+      getCaptcha()
 	})
 	const {
 		initparam,
-		infor,
 		nameline,
 		psline,
 		showClearIcon,
 		showPassword,
-		offline
+		list,
+		show,
+		loginForm,
 	} = toRefs(state)
 </script>
 
@@ -200,13 +231,6 @@
 		width: 48upx;
 		margin-left: 24upx;
 		height: 40upx;
-	}
-
-	.infor {
-		height: 80upx;
-		width: 100%;
-		line-height: 80upx;
-		text-align: center;
 	}
 
 	.bottomview {

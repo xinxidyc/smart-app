@@ -1,111 +1,110 @@
 <template>
 	<view class="contenter">
-		<view class="top bgwhite" id="fixed-box">
-			<view class="ic_image ic_search fl" @click="scroll">
-				<image src="/static/icons/ic_search.svg" />
+		<view class="header bgblue">
+            <view class="margincss">
+				<text class="fontcss mr10" @click="logout">退出<image src="/static/images/index/back.png" class="homeimg2"></image></text>
+				<text class="fontcss mr10">3年级4班</text>
+				<text class="fontcss">{{timenow}}</text>
 			</view>
-			<view class="ic_image ic_message fr">
-				<image src="/static/icons/ic_message.svg" />
+			<view class="chuqin">
+			    <image src="/static/images/login/account.png" class="homeimg1"></image>
+				<text class="bigsize color-white">出勤率：97 %</text>
 			</view>
-			<view class="ic_image ic_signin fr">
-				<image src="/static/icons/ic_signin.svg" />
+			<view class="centercss">
+				<u-grid :border="false" col="5">
+					<u-grid-item>
+						<text class="grid-text color-white">总计：</text>
+						<text>{{swiperList.length}} 人</text>
+					</u-grid-item>
+					<u-grid-item>
+						  <text class="grid-text color-white">请假：</text>
+						  <text :style="{'color': (qinjia==0?'green':'red')}" @click="goDetail(1)"><text>{{qinjia}}</text>人</text>
+					</u-grid-item>
+					<u-grid-item>
+						<text class="grid-text color-white">旷课：</text>
+						<text :style="{'color': swiperList.length==0?'green':'red'}" @click="goDetail(2)">{{swiperList.length}}人</text>
+					</u-grid-item>
+					<u-grid-item>
+						<text class="grid-text color-white">迟到：</text>
+						<text :style="{'color': swiperList.length==0?'green':'red'}" @click="goDetail(3)">{{swiperList.length}}人</text>
+					</u-grid-item>
+					<u-grid-item>
+						<text class="grid-text color-white">实到：</text>
+						<text>{{swiperList.filter(x=>x.state==3).length}}人</text>
+					</u-grid-item>
+				</u-grid>
 			</view>
-			<view class="ic_logo" @click="getScrollTop">
-				<image src="/static/images/index/logo.png" />
-			</view>
-		</view>
-		<view class="status_bar">
-			<!-- 这里是状态栏 -->
-		</view>
-		<view class="uni-slide">
-			<swiper :indicator-dots="true" :autoplay="true" :interval="5000" :duration="1000" indicator-color="#ffffff"
-				indicator-active-color="#42B983">
-				<swiper-item v-for="(item,index) in itemList" :key="index">
-					<image :src="item.url" :alt="item.title" mode="aspectFill" style="width: 100%; height: 100%" />
-				</swiper-item>
-			</swiper>
-		</view>
-		<view class="uni-swiper-msg bgwhite mb20">
-			<view class="uni-swiper-msg-icon">
-				<image src="/static/icons/ic-notification.svg"></image>
-			</view>
-			<view class="uni-swiper-msg-box">
-				<swiper vertical="true" autoplay="true" circular="true" interval="3000">
-					<swiper-item v-for="(item, index) in msg" :key="index" class="uni-swiper-msg-con">
-						<navigator>{{item}}</navigator>
-					</swiper-item>
-				</swiper>
-			</view>
-		</view>
-		<view class="content mb20">
-			<view class="bgwhite uni-nav">
-				<view class="uni-nav-con" v-for="(nav,index) in navList" :key="index">
-					<navigator :url="nav.path">
-						<view class="image-view">
-							<image class="uni-nav-image" :src="nav.url"></image>
-						</view>
-						<text class="uni-nav-title">{{nav.title}}</text>
-					</navigator>
-				</view>
-			</view>
-		</view>
-		<view class="content mb20">
-			<view class="title mb10">待办事项</view>
-			<view v-for="(item,index) in eventList" :key="index">
-				<view class="bgwhite event-box mb20">
-					<view class="event-box-top">
-						<view class="event-box-toptitle" @click="goDetail(item)">{{item.title}}</view>
-						<view class="type" :class="{'fontbg1':item.type=='1','fontbg':item.type=='2'}">
-							<text v-if="item.type==1">巡检</text>
-							<text v-if="item.type==2">其它</text>
-						</view>
-						<view class="alarmType"
-							:class="{'bg1':item.alarmType=='1','bg2':item.alarmType=='2','bg3':item.alarmType=='3'}">
-						</view>
-					</view>
-					<view class="event-box-con">
-						<view class="event-box-conleft">
-							<text>{{item.code}}</text>
-							<view>
-								<text class="mr10">{{item.user}}</text><text>{{item.time}}</text>
-							</view>
-							<text class="fontcolor999">{{item.createTime}}</text>
-						</view>
-						<view class="event-box-conright">
-							<text>{{item.content}}</text>
-						</view>
-					</view>
-				</view>
+			<view class="mtps">
+				<u-row justify="space-between">
+					<u-col span="6">
+						<view class=""></view>
+					</u-col>
+					<u-col span="2">
+						<view class="color-active">全部签到</view>
+					</u-col>
+					<u-col span="1">
+						<view class="color-active" @click="getpage">刷新</view>
+					</u-col>
+					<u-col span="3">
+						<view class="color-active" @click="goDetail(null)">查看统计数据</view>
+					</u-col>
+				</u-row>
 			</view>
 		</view>
-		<view class="content mb20" id="mubiao">
-			<view class="title mb10">其它事项</view>
-			<view v-for="(item,index) in eventList" :key="index">
-				<view class="bgwhite event-box mb20">
-					<view class="event-box-top">
-						<view class="event-box-toptitle" @click="goDetail(item)">{{item.title}}</view>
-						<view class="type" :class="{'fontbg1':item.type=='1','fontbg':item.type=='2'}">
-							<text v-if="item.type==1">巡检</text>
-							<text v-if="item.type==2">其它</text>
-						</view>
-						<view class="alarmType"
-							:class="{'bg1':item.alarmType=='1','bg2':item.alarmType=='2','bg3':item.alarmType=='3'}">
-						</view>
-					</view>
-					<view class="event-box-con">
-						<view class="event-box-conleft">
-							<text>{{item.code}}</text>
-							<view>
-								<text class="mr10">{{item.user}}</text><text>{{item.time}}</text>
-							</view>
-							<text class="fontcolor999">{{item.createTime}}</text>
-						</view>
-						<view class="event-box-conright">
-							<text>{{item.content}}</text>
-						</view>
-					</view>
-				</view>
-			</view>
+		<view class="content bgwhite">
+			<u-list
+				@scrolltolower="scrolltolower"
+			>
+			    <u-list-item>
+					<u-row customStyle="margin-bottom: 2upx;margin-top: 2upx">
+						<u-col span="1">
+							<view class="textcenter">序号</view>
+						</u-col>
+						<u-col span="3">
+							<view class="textcenter">姓名</view>
+						</u-col>
+						<u-col span="2">
+							<view class="textcenter">学号</view>
+						</u-col>
+						<u-col span="2">
+							<view class="textcenter">状态</view>
+						</u-col>
+						<u-col span="3">
+							<view class="textcenter">操作</view>
+						</u-col>
+						<u-col span="1">
+							<view class="textcenter">性别</view>
+						</u-col>
+					</u-row>
+				</u-list-item>
+				<u-line color="#2979ff"></u-line>
+				<u-list-item
+					v-for="(item, index) in swiperList"
+					:key="index"
+				>
+					<u-row :customStyle="{'color': item.state?'green':'red'}">
+						<u-col span="1">
+							<view class="textcenter mb10">{{index + 1}}</view>
+						</u-col>
+						<u-col span="3">
+							<view class="textcenter mb10" @click="editorItem(item)">{{item.actualName}}</view>
+						</u-col>
+						<u-col span="2">
+							<view class="textcenter mb10" @click="editorItem(item)">{{item.departmentId}}</view>
+						</u-col>
+						<u-col span="2">
+							<view class="textcenter mb10">{{item.state?item.state:'未签到'}}</view>
+						</u-col>
+						<u-col span="3">
+							<view class="textcenter mb10" @click="deleteemple(item)">删除</view>
+							<u-modal :show="showmodel" :title="titlemodel" :content='content' @confirm="confirmdelete(item)" @cancel="showmodel=false" @close="showmodel=false"></u-modal>
+						</u-col>
+						<u-col span="1">
+							<view class="textcenter mb10">{{item.gender==1?'男':'女'}}</view>
+						</u-col>
+					</u-row>
+				</u-list-item>
+			</u-list>
 		</view>
 	</view>
 </template>
@@ -117,158 +116,144 @@
 		computed
 	} from 'vue'
 	import {
-		onLoad
+		onLoad,
+		onUnload
 	} from '@dcloudio/uni-app'
-
-	onLoad(() => {
-		let forcedLogin = false; //模拟不需要强制登录
-		let hasLogin = false; //模拟没有登录
-		if (!hasLogin) {
-			uni.showModal({
-				title: "未登录",
-				content: "您未登录，需要登录后才能继续",
-				/**
-				 * 如果需要强制登录，不显示取消按钮
-				 */
-				showCancel: !forcedLogin,
-				success: (res) => {
-					if (res.confirm) {
-						/**
-						 * 如果需要强制登录，使用reLaunch方式
-						 */
-						if (forcedLogin) {
-							uni.reLaunch({
-								url: "/pages/login/login",
-							});
-						} else {
-							uni.navigateTo({
-								url: "/pages/login/login",
-							});
-						}
-					}
-				},
-			});
-		}
-	})
-
+    import {userApi} from '@/api'
+    import useStore from '@/store/modules/user';
+	
 	const state = reactive({
-		itemList: [{
-				title: "img1",
-				url: "/static/images/index/slide.jpg"
-			},
-			{
-				title: "img2",
-				url: "/static/images/index/slide.jpg"
-			},
-		],
-		msg: [
-			"uni-app行业峰会频频亮相，开发者反响热烈",
-			"DCloud完成B2轮融资，uni-app震撼发布",
-			"36氪热文榜推荐、CSDN公号推荐 DCloud CEO文章36氪热文榜推荐、CSDN公号推荐 DCloud CEO文章",
-		],
-		navList: [{
-				title: "分享操作",
-				url: "/static/icons/ic_duty.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "巡检管理",
-				url: "/static/icons/ic_polling.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "工单管理",
-				url: "/static/icons/ic_workorder.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "资产管理",
-				url: "/static/icons/ic_property.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "我的关注",
-				url: "/static/icons/ic_myfocus.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "知识管理",
-				url: "/static/icons/ic_knowledge.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "容量管理",
-				url: "/static/icons/ic_capacity.svg",
-				path: "/pages/env/index",
-			},
-			{
-				title: "更多",
-				url: "/static/icons/ic_more.svg",
-				path: "/pages/env/index",
-			},
-		],
-		eventList: [{
-				id: "1",
-				title: "UPS欠压排查维修",
-				user: "张三",
-				time: "2018-11-13 12:30",
-				createTime: "1小时前",
-				code: "WOT-201807130001",
-				type: "1",
-				alarmType: "1",
-				content: "待审批",
-			},
-			{
-				id: "2",
-				title: "机房001配电系统例行巡检",
-				user: "张三",
-				time: "2018-11-13 12:30",
-				createTime: "1小时前",
-				code: "WOT-201807130001",
-				type: "1",
-				alarmType: "2",
-				content: "待执行",
-			},
-			{
-				id: "3",
-				title: "机房003配电系统例行巡检",
-				user: "张三",
-				time: "2018-11-13 12:30",
-				createTime: "1小时前",
-				code: "WOT-201807130001",
-				type: "2",
-				alarmType: "3",
-				content: "待通过",
-			},
-		],
+		swiperList: ['序号', '姓名', '学号', '状态', '手机号', '性别'],
+		timenow: new Date(),
+		users:{
+			departmentId: 0,
+			disabledFlag: false,
+			pageNum: 1,
+			pageSize: 100,
+		},
+		qinjia: 0,
+		showmodel: false,
+		titlemodel: '删除信息',
+		content: ''
 	})
-	const scroll = () => {}
-	const getScrollTop = () => {}
-	const goDetail = (item) => {
+	let timer = null
+	const store = useStore()
+	onLoad(() => {
+		timer = setInterval(function () {
+		    state.timenow = new Date().toLocaleString()
+		})
+		getpage()
+	})
+	onUnload(()=>{
+		if (timer) {
+		      clearInterval(timer)
+	    }
+	})
+	const getpage = async () =>{
+		const userinfo = store.getUserInfo
+		state.users.departmentId = userinfo.departmentId
+		const captchaResult = await userApi.query(state.users);
+		if(captchaResult.ok){
+			state.swiperList=captchaResult.data.list;
+			state.qinjia = state.swiperList.filter(ih=>ih==1).length
+		}else{
+			uni.showToast({
+			  title: '查询失败',
+			});
+			state.swiperList=[]
+			state.qinjia = 0
+		}
+	}
+    const logout = () =>{
 		uni.navigateTo({
-			url: "/pages/workOrder/detail?detail=" + encodeURIComponent(JSON.stringify(item)),
+			url: "/pages/login/login",
 		});
 	}
+	const editorItem = (item) =>{
+		uni.navigateTo({
+			url: "/pages/workOrder/editor?item=" + encodeURIComponent(JSON.stringify(item)),
+		});
+	}
+	const goDetail = (item) => {
+		uni.navigateTo({
+			url: "/pages/workOrder/detail?state=" + encodeURIComponent(JSON.stringify(item)),
+		});
+	}
+	const deleteemple = (item) => {
+		state.showmodel = true;
+		state.content = "确认删除"+item.loginName+"的账号信息？"
+	}
+	const confirmdelete = async (item) => {
+		const captchaResult = await userApi.deleteple([item.employeeId]);
+		state.showmodel=false
+		if(captchaResult.ok){
+			uni.showToast({
+			  title: '操作成功',
+			});
+			getpage()
+		}else{
+			uni.showToast({
+			  title: '操作失败',
+			});
+		}
+	}
 	const {
-		itemList,
-		msg,
-		navList,
-		eventList
+		swiperList,
+		timenow,
+		qinjia
 	} = toRefs(state)
 </script>
 
 <style scoped lang="less">
-	.status_bar {
-		/* #ifdef APP-PLUS */
-		height: calc(80upx + var(--status-bar-height));
-		/* #endif */
-
-		/* #ifndef APP-PLUS */
-		height: 80upx;
-		/* #endif */
-		width: 100%;
+	.mtps {
+		margin-top: 70upx;
 	}
-
+	.bigsize {
+		font-size: 40upx;
+	}
+	.chuqin {
+		height: 150upx;
+		text-align: center;
+	    display: flex;
+	    justify-content: center;
+		align-items:center;
+	}
+	.centercss {
+		height: 50upx;
+		line-height:50upx;
+		padding-left: 5%;
+		padding-right: 5%;
+	}
+	.margincss {
+		padding-top: 10upx;
+	}
+	.homeimg {
+		width: 30upx;
+		height: 30upx;
+	}
+	.homeimg1 {
+		width: 31upx;
+		height: 31upx;
+		margin-right: 10upx;
+		line-height: 150upx;
+	}
+	.homeimg2 {
+		width: 40upx;
+		height: 40upx;
+		margin-top: 10upx;
+		margin-left: 10upx;
+	}
+    .fontcss {
+		font-size: 40upx;
+	}
+    
+	.grid-text {
+		font-size: 14upx;
+		padding: 10npx 0 20npx 0rpx;
+		/* #ifndef APP-PLUS */
+		box-sizing: border-box;
+		/* #endif */
+	}
 	.top {
 		width: calc(100% - 40upx);
 		/* #ifdef APP-PLUS */
@@ -311,6 +296,10 @@
 	.ic_logo image {
 		width: 100%;
 		height: 40upx;
+	}
+	.header {
+		width: 100%;
+		height: 400upx;
 	}
 
 	.uni-slide,
