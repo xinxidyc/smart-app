@@ -16,6 +16,10 @@ function query(param: any) {
   return http.post('employee/query', param)
 }
 
+function querystudent(param: any) {
+  return http.post('sign-in/query', param)
+}
+
 function register(param: any) {
   return http.post('register', param)
 }
@@ -44,5 +48,6 @@ export default {
   reset,
   getparmet,
   update,
-  deleteple
+  deleteple,
+  querystudent
 }

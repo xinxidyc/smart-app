@@ -126,7 +126,7 @@
 			loginName: '',
 			gender: '',
 			departmentId: '2',
-			disabledFlag: true,
+			disabledFlag: false,
 			phone: '',
 			loginPwd: '',
 			code: ""

@@ -87,16 +87,19 @@
 							<view class="textcenter mb10">{{index + 1}}</view>
 						</u-col>
 						<u-col span="3">
-							<view class="textcenter mb10" @click="editorItem(item)">{{item.actualName}}</view>
+							<view class="textcenter mb10">{{item.actualName}}</view>
 						</u-col>
 						<u-col span="2">
-							<view class="textcenter mb10" @click="editorItem(item)">{{item.departmentId}}</view>
+							<view class="textcenter mb10">{{item.departmentId}}</view>
 						</u-col>
 						<u-col span="2">
-							<view class="textcenter mb10">{{item.state?item.state:'未签到'}}</view>
+							<view class="textcenter mb10" @click="editorItem(item)">{{item.state?item.state:'未签到'}}</view>
 						</u-col>
 						<u-col span="3">
-							<view class="textcenter mb10" @click="deleteemple(item)">删除</view>
+							<view class="flex">
+								<text class="textcenter mb10" style="margin-right: 15upx;" @click="editorItem(item)">编辑</text>
+								<text class="textcenter mb10" @click="deleteemple(item)">删除</text>
+							</view>
 							<u-modal :show="showmodel" :title="titlemodel" :content='content' @confirm="confirmdelete(item)" @cancel="showmodel=false" @close="showmodel=false"></u-modal>
 						</u-col>
 						<u-col span="1">
@@ -152,7 +155,7 @@
 	const getpage = async () =>{
 		const userinfo = store.getUserInfo
 		state.users.departmentId = userinfo.departmentId
-		const captchaResult = await userApi.query(state.users);
+		const captchaResult = await userApi.querystudent(state.users);
 		if(captchaResult.ok){
 			state.swiperList=captchaResult.data.list;
 			state.qinjia = state.swiperList.filter(ih=>ih==1).length

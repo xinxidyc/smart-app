@@ -1,86 +1,177 @@
 <template>
 	<view>
-		<view class="margincss">
-			<text class="fontcss mr10" @click="logout"><image src="/static/images/index/back.png" class="homeimg2"></image></text>
-			<text class="fontcss mr10">统计分析</text>
+		<view><l-echart class="chart" ref="chart"></l-echart></view>
+	</view>
+	<view class="paddcss">
+		<u-tabs :list="list" @click="select"></u-tabs>
+		<view v-if="index==0">
+			<u--form :model="searchForm" ref="uForm" labelWidth="0">
+				<u-form-item label="" prop="text" borderBottom>
+					<u-input v-model="searchForm.text" border="bottom" placeholder="请输入手机号或者账号"/>
+				</u-form-item>
+				<u-form-item label="" prop="isDate" borderBottom>
+					<input type="text" v-model="searchForm.isDate" @click="show=!show"/>
+				</u-form-item>
+			</u--form>
+			<u-list>
+				<u-list-item
+					v-for="(item, index) in indexList"
+					:key="index"
+				>
+					<u-cell
+						:title="`列表长度-${index + 1}`"
+					>
+						<template #icon>
+							<u-avatar
+								shape="square"
+								size="35"
+								:src="item.url"
+								customStyle="margin: -3px 5px -3px 0"
+							></u-avatar>
+						</template>
+					</u-cell>
+				</u-list-item>
+			</u-list>
 		</view>
+		<view v-if="index==1">
+			
+		</view>
+		
 	</view>
 </template>
 
 <script setup lang="ts">
 	import {
 		reactive,
-		toRefs
+		toRefs,
+		ref
 	} from 'vue'
 	import {
 		onShow,
 		onLoad,
+		onReady
 	} from '@dcloudio/uni-app'
+	import * as echarts from 'echarts'
+	import useStore from '@/store/modules/user';
+	
+	const datetimePicker = ref(null);
+	let chart = ref(null); // 获取dom
+	const keyword = ref('')
+	const store = useStore()
 	const state = reactive({
 		detail: {
 			title: ""
+		},
+		option:{},
+		indexList: [{
+			url:'https://cdn.uviewui.com/uview/album/1.jpg'
+		},{
+			url:'https://cdn.uviewui.com/uview/album/2.jpg'
+		}],
+		list:[{
+			name: '按班级查询',
+		}, {
+			name: '按学生查询',
+		}],
+		index: 0,
+		show: false,
+		searchForm:{
+			text:'',
+			isDate:''
 		}
 	})
+	const search = (e) =>{
+		
+	}
+	const select = (index) => {
+		state.index = index
+	}
+
+	const formatter =(type, value) =>{
+			if (type === 'year') {
+				return `${value}年`;
+			}
+			if (type === 'month') {
+				return `${value}月`;
+			}
+			if (type === 'day') {
+				return `${value}日`;
+			}
+			return value;
+		}
+		
+	const confirm =async (e) =>{
+		debugger
+			state.show = false;
+			const timeFormat = uni.$u.timeFormat;
+			let timeValue = await timeFormat(e.value, 'yyyy-mm');
+			state.searchForm.isDate = timeValue;
+
+		}
 	onLoad((e) => {
-		state.detail = JSON.parse(decodeURIComponent(e.detail));
-		uni.setNavigationBarTitle({
-			title: state.detail.title
-		})
+		// state.detail = JSON.parse(decodeURIComponent(e.detail));
+		// uni.setNavigationBarTitle({
+		// 	title: state.detail.title
+		// });
+		const userinfo = store.getUserInfo
+		debugger
+		if(userinfo.departmentName.includes('班'))
+		state.option = {
+		  title: {
+			text: 'Referer',
+			left: 'center'
+		  },
+		  tooltip: {
+			trigger: 'item'
+		  },
+		  legend: {
+			orient: 'vertical',
+			left: 'right'
+		  },
+		  series: [
+			{
+			  name: 'Access From',
+			  type: 'pie',
+			  radius: '50%',
+			  data: [
+				{ value: 1048, name: 'Search Engine' },
+				{ value: 735, name: 'Direct' },
+				{ value: 580, name: 'Email' },
+				{ value: 484, name: 'Union Ads' },
+			  ],
+			  emphasis: {
+				itemStyle: {
+				  shadowBlur: 10,
+				  shadowOffsetX: 0,
+				  shadowColor: 'rgba(0, 0, 0, 0.5)'
+				}
+			  }
+			}
+		  ]
+		};
+		setTimeout(()=>{
+			const myChart = echarts.init(chart.value);
+			myChart.setOption(state.option)
+		},300)
+		
 	})
 	const {
-		detail
+		detail,
+		indexList,
+		index,
+		list,
+		show,
+		searchForm
 	} = toRefs(state)
 </script>
 
 <style scoped lang="less">
-.mtps {
-		margin-top: 70upx;
+	.chart {
+		width: 700upx;
+		height: 650upx;
 	}
-	.bigsize {
-		font-size: 40upx;
-	}
-	.chuqin {
-		height: 150upx;
-		text-align: center;
-	    display: flex;
-	    justify-content: center;
-		align-items:center;
-	}
-	.centercss {
-		height: 50upx;
-		line-height:50upx;
-		padding-left: 5%;
-		padding-right: 5%;
-	}
-	.margincss {
-		padding-top: 10upx;
-	}
-	.homeimg {
-		width: 30upx;
-		height: 30upx;
-	}
-	.homeimg1 {
-		width: 31upx;
-		height: 31upx;
-		margin-right: 10upx;
-		line-height: 150upx;
-	}
-	.homeimg2 {
-		width: 40upx;
-		height: 40upx;
-		margin-top: 10upx;
-		margin-left: 10upx;
-	}
-    .fontcss {
-		font-size: 40upx;
-	}
-    
-	.grid-text {
-		font-size: 14upx;
-		padding: 10npx 0 20npx 0rpx;
-		/* #ifndef APP-PLUS */
-		box-sizing: border-box;
-		/* #endif */
+	.paddcss {
+		padding: 10upx;
 	}
 	.top {
 		width: calc(100% - 40upx);
